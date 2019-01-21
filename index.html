@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="https://apis.google.com/js/api.js"></script>
+  <script>
+    var pickerApiLoaded = false;
+
+    gapi.load('picker', function(){
+      pickerApiLoaded = true;
+    });
+
+    function getOAuthToken() {
+      google.script.run
+        .withSuccessHandler(createPicker)
+        .withFailureHandler(showError)
+        .getOAuthToken();
+    }
+
+    function createPicker(token) {
+      if(missPickerApi(token)){ return; }
+
+      var picker = new google.picker.PickerBuilder()
+          .addView(new google.picker.DocsView())
+          .setOAuthToken(token)
+          .setCallback(pickerCallback)
+          .setOrigin(google.script.host.origin)
+          .build();
+      picker.setVisible(true);
+    }
+
+    function missPickerApi(token) {
+      if(pickerApiLoaded && token) {
+        return false;
+      }
+      showError('Unable to load the file picker.');
+      return true;
+    }
+
+    function pickerCallback(data) {
+      if(canceldPicker(data)) { return; }
+
+      var doc = data[google.picker.Response.DOCUMENTS][0];
+      var id = doc[google.picker.Document.ID];
+      var url = doc[google.picker.Document.URL];
+      var title = doc[google.picker.Document.NAME];
+      document.getElementById('result').innerHTML =
+          '<b>You chose:</b><br>Name: <a href="' + url + '">' + title +
+          '</a><br>ID: ' + id;
+    }
+
+    function cancelePicker(data) {
+      var action = data[google.picker.Response.ACTION];
+      if(actoin == google.picker.Action.CANCEL) {
+        document.getElementById('result').innerHTML = 'Picker canceled.';
+        return true;
+      }
+      return false;
+    }
+
+    function showError(message) {
+      document.getElementById('result').innerHTML = 'Error: ' + message;
+    }
+  </script>
+</head>
+<body>
+  <div>
+    <button onclick='getOAuthToken()'>Select a file</button>
+    <p id='result'></p>
+  </div>
+</body>
+</html>
