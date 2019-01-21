@@ -37,7 +37,7 @@
     }
 
     function pickerCallback(data) {
-      if(canceldPicker(data)) { return; }
+      if(cancelePicker(data)) { return; }
 
       var doc = data[google.picker.Response.DOCUMENTS][0];
       var id = doc[google.picker.Document.ID];
