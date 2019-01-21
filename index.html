@@ -17,18 +17,18 @@
     }
 
     function createPicker(token) {
-      if(missPickerApi(token)){ return; }
+      if(isFailed(token)){ return; }
 
       var picker = new google.picker.PickerBuilder()
           .addView(new google.picker.DocsView())
           .setOAuthToken(token)
-          .setCallback(pickerCallback)
+          .setCallback(showData)
           .setOrigin(google.script.host.origin)
           .build();
       picker.setVisible(true);
     }
 
-    function missPickerApi(token) {
+    function isFailed(token) {
       if(pickerApiLoaded && token) {
         return false;
       }
@@ -36,8 +36,8 @@
       return true;
     }
 
-    function pickerCallback(data) {
-      if(cancelePicker(data)) { return; }
+    function showData(data) {
+      if(isCanceled(data)) { return; }
 
       var doc = data[google.picker.Response.DOCUMENTS][0];
       var id = doc[google.picker.Document.ID];
@@ -48,7 +48,7 @@
           '</a><br>ID: ' + id;
     }
 
-    function cancelePicker(data) {
+    function isCanceled(data) {
       var action = data[google.picker.Response.ACTION];
       if(actoin == google.picker.Action.CANCEL) {
         document.getElementById('result').innerHTML = 'Picker canceled.';
